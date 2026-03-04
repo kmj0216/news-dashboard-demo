@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국민일보 독자 행동 인사이트 보고서 | 2026.02.25~26</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #1a3a6b;
+    --accent: #e8392a;
+    --accent2: #f5a623;
+    --accent3: #27ae60;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --border: #dde3ef;
+    --text: #1c2340;
+    --muted: #6b7a99;
+    --shadow: 0 2px 16px rgba(26,58,107,0.09);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* HEADER */
+  .report-header {
+    background: linear-gradient(135deg, #1a3a6b 0%, #0d2247 60%, #1a3a6b 100%);
+    color: #fff; padding: 48px 40px 36px; position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .report-header h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .report-header .subtitle { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 20px; }
+  .header-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 4px 14px; font-size: 12px; color: rgba(255,255,255,0.85);
+  }
+
+  /* NAV */
+  .nav-bar {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 0 40px; display: flex; gap: 0; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .nav-bar a {
+    display: block; padding: 14px 18px; font-size: 13px; font-weight: 600;
+    color: var(--muted); text-decoration: none; border-bottom: 3px solid transparent;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-bar a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* LAYOUT */
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px 40px; }
+  .section { margin-bottom: 48px; }
+  .section-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    padding-bottom: 14px; border-bottom: 2px solid var(--border);
+  }
+  .section-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 18px; font-weight: 800; color: var(--primary); }
+  .section-header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: 14px; box-shadow: var(--shadow); padding: 24px; }
+  .card-grid { display: grid; gap: 20px; }
+  .card-grid-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+  .card-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+
+  /* KPI STRIP */
+  .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi-card {
+    background: var(--card); border-radius: 12px; padding: 18px 20px;
+    box-shadow: var(--shadow); border-left: 4px solid var(--primary);
+  }
+  .kpi-card.red { border-left-color: var(--accent); }
+  .kpi-card.orange { border-left-color: var(--accent2); }
+  .kpi-card.green { border-left-color: var(--accent3); }
+  .kpi-card.purple { border-left-color: #8e44ad; }
+  .kpi-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 800; color: var(--text); }
+  .kpi-unit { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* CHART WRAPPER */
+  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap-tall { position: relative; height: 340px; }
+  .chart-wrap-sm { position: relative; height: 220px; }
+
+  /* TABLE */
+  .insight-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .insight-table th {
+    background: #f0f3fa; color: var(--primary); font-weight: 700;
+    padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--border);
+  }
+  .insight-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .insight-table tr:last-child td { border-bottom: none; }
+  .insight-table tr:hover td { background: #f8f9fd; }
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: 800;
+    background: var(--primary); color: #fff;
+  }
+  .rank-badge.gold { background: #f5a623; }
+  .rank-badge.silver { background: #8e9ab5; }
+  .rank-badge.bronze { background: #c0845a; }
+
+  /* PROGRESS BAR */
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar-bg { flex: 1; height: 8px; background: #e8ecf5; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .bar-val { font-size: 12px; font-weight: 700; color: var(--primary); min-width: 42px; text-align: right; }
+
+  /* TAG */
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 700;
+  }
+  .tag-red { background: #fdecea; color: var(--accent); }
+  .tag-blue { background: #e8f0fe; color: #1a3a6b; }
+  .tag-green { background: #e8f8ef; color: #27ae60; }
+  .tag-orange { background: #fef3e2; color: #e67e22; }
+  .tag-purple { background: #f3e8fd; color: #8e44ad; }
+
+  /* INSIGHT BOX */
+  .insight-box {
+    background: linear-gradient(135deg, #eef2fb 0%, #f8f9fd 100%);
+    border: 1px solid #d0d9f0; border-left: 4px solid var(--primary);
+    border-radius: 10px; padding: 14px 18px; margin-top: 16px;
+  }
+  .insight-box h4 { font-size: 12px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+  .insight-box ul { padding-left: 16px; }
+  .insight-box li { font-size: 12px; color: var(--text); line-height: 1.8; }
+
+  /* ACTION TABLE */
+  .action-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .action-table th {
+    background: var(--primary); color: #fff; font-weight: 700;
+    padding: 10px 14px; text-align: left;
+  }
+  .action-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .action-table tr:last-child td { border-bottom: none; }
+  .priority-dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px;
+  }
+
+  /* FOOTER */
+  .report-footer {
+    background: var(--primary); color: rgba(255,255,255,0.6);
+    text-align: center; padding: 24px; font-size: 12px; margin-top: 40px;
+  }
+
+  /* DIVIDER */
+  .day-divider {
+    position: relative; text-align: center; margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .container { padding: 20px; }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+    .nav-bar { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="report-header">
+  <h1>📰 국민일보 디지털 독자 행동 인사이트 보고서</h1>
+  <div class="subtitle">데이터 수집 시작 이후 유효 기간 기준 · 시간별(Hourly) 분석</div>
+  <div class="header-badges">
+    <span class="badge">📅 2026.02.25 ~ 02.26</span>
+    <span class="badge">⏱ 시간별 시계열</span>
+    <span class="badge">📊 5개 인사이트 테마</span>
+    <span class="badge">🔢 총 조회수 305,572</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-bar">
+  <a href="#kpi">📌 KPI 요약</a>
+  <a href="#section-a">A. 기사 길이 × 완독률</a>
+  <a href="#section-b">B. 서브섹션 인기도</a>
+  <a href="#section-c">C. 헤드라인 패턴</a>
+  <a href="#section-d">D. 세션 깊이</a>
+  <a href="#section-e">E. 섹션별 완독 효율</a>
+  <a href="#action">🎯 액션 플랜</a>
+</div>
+
+<div class="container">
+
+  <!-- KPI STRIP -->
+  <div id="kpi" class="kpi-strip" style="margin-top:28px;">
+    <div class="kpi-card">
+      <div class="kpi-label">총 기사 조회수</div>
+      <div class="kpi-value">305,572</div>
+      <div class="kpi-unit">2/25~26 합산</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">총 완독(scroll_75)</div>
+      <div class="kpi-value">63,234</div>
+      <div class="kpi-unit">전체 완독률 20.7%</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">총 세션 수</div>
+      <div class="kpi-value">228,873</div>
+      <div class="kpi-unit">2/25: 86,992 / 2/26: 141,881</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">평균 세션 길이</div>
+      <div class="kpi-value">90.7초</div>
+      <div class="kpi-unit">2/25: 84.7s / 2/26: 96.8s</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">피크 트래픽 시간</div>
+      <div class="kpi-value">09~10시</div>
+      <div class="kpi-unit">2/26 기준 최고 10,079 세션</div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION A ===== -->
+  <div id="section-a" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:#eef2fb;">📏</div>
+      <div>
+        <h2>A. 기사 길이(article_length) × 완독률 상관관계</h2>
+        <p>article_view vs scroll_75 시간별 추이 · 기사 분량별 완독 효율 분석</p>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">📈 주요 기사 길이별 조회수 시간 추이 (2/25~26)</div>
+        <div class="card-sub">상위 5개 분량 기준 · 시간별 article_view 합산</div>
+        <div class="chart-wrap-tall"><canvas id="chartA1"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 기사 길이별 완독률 비교 (2/25~26 합산)</div>
+        <div class="card-sub">완독률 = scroll_75 / article_view × 100</div>
+        <div class="chart-wrap-tall"><canvas id="chartA2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 기사 길이별 완독 효율 상세 테이블</div>
+      <div class="card-sub">2/25~26 합산 기준 · 완독률 내림차순 정렬</div>
+      <table class="insight-table" style="margin-top:12px;">
+        <thead>
+          <tr>
+            <th>순위</th><th>기사 길이(자)</th><th>조회수</th><th>완독수</th><th>완독률</th><th>완독률 시각화</th><th>평가</th>
+          </tr>
+        </thead>
+        <tbody id="tableA"></tbody>
+      </table>
+      <div class="insight-box">
+        <h4>💡 핵심 인사이트</h4>
+        <ul>
+          <li><strong>1,374자가 완독률 최고(32.8%)</strong> — 정보 밀도와 읽기 부담의 최적 균형점</li>
+          <li><strong>800~900자 구간이 완독률 최저(12~13%)</strong> — 짧지만 어중간한 분량이 오히려 이탈 유발</li>
+          <li><strong>1,880자 이상 장문도 완독률 27%</strong> — 깊이 있는 기사는 관심 독자를 끝까지 붙잡음</li>
+          <li><strong>권장 기사 분량: 1,300~1,400자 또는 1,600자 이상</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION B ===== -->
+  <div id="section-b" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fef3e2;">📂</div>
+      <div>
+        <h2>B. 서브섹션 심층 인기도 분석</h2>
+        <p>섹션 단위보다 한 단계 깊은 서브섹션별 시간별 조회 추이</p>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">📈 TOP 5 서브섹션 시간별 조회 추이</div>
+        <div class="card-sub">사회일반·사건사고·대통령실·정치일반·산업기업</div>
+        <div class="chart-wrap-tall"><canvas id="chartB1"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 서브섹션별 총 조회수 순위 (2/25~26 합산)</div>
+        <div class="card-sub">TOP 10 서브섹션 · 가로 막대 차트</div>
+        <div class="chart-wrap-tall"><canvas id="chartB2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 서브섹션 TOP 15 상세 테이블</div>
+      <table class="insight-table" style="margin-top:12px;">
+        <thead>
+          <tr><th>순위</th><th>서브섹션</th><th>상위 섹션</th><th>조회수</th><th>비중</th><th>비중 시각화</th></tr>
+        </thead>
+        <tbody id="tableB"></tbody>
+      </table>
+      <div class="insight-box">
+        <h4>💡 핵심 인사이트</h4>
+        <ul>
+          <li><strong>사회일반 + 사건사고 = 전체의 48%</strong> — 사회면이 독자 트래픽의 절반을 책임짐</li>
+          <li><strong>북한/한반도(9,721) > 국제일반(7,259)</strong> — 안보·한반도 관심이 일반 국제뉴스보다 높음</li>
+          <li><strong>법원/검찰(8,432)이 상위권</strong> — 사법 이슈 콘텐츠 수요 높음, 전담 코너 신설 검토 가능</li>
+          <li><strong>더미션 뉴스일반(11,417)이 경제일반(11,581)과 거의 동등</strong> — 기독교 독자층 충성도 매우 높음</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION C ===== -->
+  <div id="section-c" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fdecea;">🔥</div>
+      <div>
+        <h2>C. 인기 헤드라인 패턴 분석 (바이럴 공식 해부)</h2>
+        <p>TOP 10 헤드라인 시간별 조회 추이 · 바이럴 유형 분류</p>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">📈 TOP 5 헤드라인 시간별 조회 추이</div>
+        <div class="card-sub">각 기사의 시간대별 트래픽 폭발 패턴 확인</div>
+        <div class="chart-wrap-tall"><canvas id="chartC1"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 TOP 10 헤드라인 총 조회수 비교</div>
+        <div class="card-sub">2/25~26 합산 · 바이럴 유형별 색상 구분</div>
+        <div class="chart-wrap-tall"><canvas id="chartC2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 TOP 10 헤드라인 상세 분석</div>
+      <table class="insight-table" style="margin-top:12px;">
+        <thead>
+          <tr><th>순위</th><th>헤드라인</th><th>조회수</th><th>바이럴 유형</th><th>핵심 기법</th></tr>
+        </thead>
+        <tbody id="tableC"></tbody>
+      </table>
+      <div class="insight-box">
+        <h4>💡 헤드라인 3대 바이럴 공식</h4>
+        <ul>
+          <li><strong>① 분노·충격 유발</strong> — 도덕적 공분, 피해자 서사 ("신생아 옆에서 담배", "화재 참변")</li>
+          <li><strong>② 유명인 밀착 서사</strong> — 이부진·민희진 등 실명 + 구체적 상황 ("콕 찍어 호명", "가족 총출동")</li>
+          <li><strong>③ AI·신기술 호기심</strong> — 반전 구조 + 따옴표 인용 ("사람인 줄 알았는데")</li>
+          <li><strong>공통 문법</strong> — 따옴표(" ") 상위 10개 중 8개, 말줄임표(…) 7개, 구체적 숫자 포함</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION D ===== -->
+  <div id="section-d" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:#e8f8ef;">⏱</div>
+      <div>
+        <h2>D. 세션 깊이 분석 — 독자 체류 행동</h2>
+        <p>시간별 총 세션 수 · 평균 세션 길이 추이 (2/25~26)</p>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">📈 시간별 총 세션 수 추이</div>
+        <div class="card-sub">2/25(토) vs 2/26(일) 비교 · 피크 시간대 확인</div>
+        <div class="chart-wrap-tall"><canvas id="chartD1"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 시간별 평균 세션 길이(초) 추이</div>
+        <div class="card-sub">독자 체류 깊이 변화 · 이상치 제외 후 표시</div>
+        <div class="chart-wrap-tall"><canvas id="chartD2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 세션 지표 요약</div>
+      <table class="insight-table" style="margin-top:12px;">
+        <thead>
+          <tr><th>지표</th><th>2/25 (토)</th><th>2/26 (일)</th><th>변화</th><th>해석</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>총 세션 수</strong></td>
+            <td>86,992</td><td>141,881</td>
+            <td><span class="tag tag-green">+63%</span></td>
+            <td>일요일 트래픽이 토요일 대비 1.6배</td>
+          </tr>
+          <tr>
+            <td><strong>피크 시간</strong></td>
+            <td>14시 (9,559)</td><td>09시 (10,079)</td>
+            <td>—</td>
+            <td>토요일은 오후, 일요일은 오전 집중</td>
+          </tr>
+          <tr>
+            <td><strong>평균 세션 길이</strong></td>
+            <td>84.7초</td><td>96.8초</td>
+            <td><span class="tag tag-green">+14%</span></td>
+            <td>일요일 독자가 더 깊이 읽음</td>
+          </tr>
+          <tr>
+            <td><strong>1인당 평균 세션</strong></td>
+            <td>1.07회</td><td>1.11회</td>
+            <td>—</td>
+            <td>대부분 1회 방문 후 이탈 — 재방문 유도 필요</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="insight-box">
+        <h4>💡 핵심 인사이트</h4>
+        <ul>
+          <li><strong>1인당 세션 1.1회</strong> — 검색·SNS 유입 후 단발 소비가 지배적, 관련 기사 추천 UI 강화 필요</li>
+          <li><strong>일요일 오전 9~10시가 최고 피크</strong> — 주말 아침 뉴스 소비 습관 공략 필요</li>
+          <li><strong>평균 체류 90초</strong> — 기사 1~2개 소비 수준, 기사 하단 "다음 기사" 자동 로딩 도입 검토</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION E ===== -->
+  <div id="section-e" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:#f3e8fd;">📊</div>
+      <div>
+        <h2>E. 섹션별 완독 효율 (완독률 역산)</h2>
+        <p>섹션별 article_view vs scroll_75 시간별 추이 · 완독률 비교</p>
+      </div>
+    </div>
+
+    <div class="card-grid card-grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">📈 주요 섹션별 조회수 시간 추이</div>
+        <div class="card-sub">사회·정치·경제·더미션·엔터 · 시간별 article_view</div>
+        <div class="chart-wrap-tall"><canvas id="chartE1"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 섹션별 완독률 비교 (2/25~26 합산)</div>
+        <div class="card-sub">완독률 = scroll_75 / article_view × 100</div>
+        <div class="chart-wrap-tall"><canvas id="chartE2"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 섹션별 완독 효율 상세 테이블</div>
+      <table class="insight-table" style="margin-top:12px;">
+        <thead>
+          <tr><th>순위</th><th>섹션</th><th>조회수</th><th>완독수</th><th>완독률</th><th>완독률 시각화</th><th>전략</th></tr>
+        </thead>
+        <tbody id="tableE"></tbody>
+      </table>
+      <div class="insight-box">
+        <h4>💡 핵심 인사이트</h4>
+        <ul>
+          <li><strong>정치 섹션 완독률 21.3% 1위</strong> — 조회수는 사회 다음이지만 독자 몰입도 최고, 심층 분석 기사 강화 권장</li>
+          <li><strong>오피니언 완독률 10.5% 최하위</strong> — 칼럼·사설이 도입부에서 이탈, 요약 박스·소제목 추가 필요</li>
+          <li><strong>더미션 완독률 13.4%</strong> — 기독교 독자 특성상 묵상·설교 콘텐츠는 긴 호흡 필요, 분량 조정 검토</li>
+          <li><strong>국제 섹션 완독률 16.1%</strong> — 북한/한반도 서브섹션이 핵심 드라이버</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ACTION PLAN ===== -->
+  <div id="action" class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:#fdecea;">🎯</div>
+      <div>
+        <h2>종합 액션 플랜</h2>
+        <p>인사이트 A~E 기반 우선순위별 실행 과제</p>
+      </div>
+    </div>
+    <div class="card">
+      <table class="action-table">
+        <thead>
+          <tr><th>우선순위</th><th>인사이트</th><th>과제</th><th>기대 효과</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="priority-dot" style="background:#e8392a;"></span><strong>즉시</strong></td>
+            <td><span class="tag tag-red">C. 헤드라인</span></td>
+            <td>따옴표·말줄임표·숫자 활용 헤드라인 가이드라인 수립</td>
+            <td>클릭률 즉시 개선</td>
+          </tr>
+          <tr>
+            <td><span class="priority-dot" style="background:#e8392a;"></span><strong>즉시</strong></td>
+            <td><span class="tag tag-purple">E. 섹션 완독</span></td>
+            <td>오피니언 포맷 개선 (도입 요약 박스, 소제목 추가)</td>
+            <td>완독률 10% → 15% 목표</td>
+          </tr>
+          <tr>
+            <td><span class="priority-dot" style="background:#f5a623;"></span><strong>단기</strong></td>
+            <td><span class="tag tag-blue">A. 기사 길이</span></td>
+            <td>기사 분량 1,300~1,400자 권장 가이드 편집국 배포</td>
+            <td>완독률 평균 5%p 향상</td>
+          </tr>
+          <tr>
+            <td><span class="priority-dot" style="background:#f5a623;"></span><strong>단기</strong></td>
+            <td><span class="tag tag-orange">B. 서브섹션</span></td>
+            <td>북한/한반도·법원/검찰 콘텐츠 강화, 전담 코너 신설 검토</td>
+            <td>서브섹션 트래픽 확대</td>
+          </tr>
+          <tr>
+            <td><span class="priority-dot" style="background:#27ae60;"></span><strong>중기</strong></td>
+            <td><span class="tag tag-green">D. 세션 깊이</span></td>
+            <td>관련 기사 추천 UI 개선, 기사 하단 자동 로딩 도입</td>
+            <td>1인당 세션 1.1 → 1.5회 목표</td>
+          </tr>
+          <tr>
+            <td><span class="priority-dot" style="background:#27ae60;"></span><strong>중기</strong></td>
+            <td><span class="tag tag-purple">E. 섹션 완독</span></td>
+            <td>정치 섹션 심층 기사 확대, 완독률 1위 섹션 트래픽 극대화</td>
+            <td>정치 섹션 조회수 30% 확대</td>
+          </tr>
+          <tr>
+            <td><span class="priority-dot" style="background:#8e44ad;"></span><strong>장기</strong></td>
+            <td><span class="tag tag-green">D. 세션 깊이</span></td>
+            <td>뉴스레터·푸시 알림 가입 CTA 삽입, 재방문 유도 체계 구축</td>
+            <td>재방문율 개선, 충성 독자 확보</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="report-footer">
+  국민일보 디지털 독자 행동 인사이트 보고서 · 분석 기간: 2026.02.25~26 · Powered by Amplitude Analytics
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const hours25 = Array.from({length:24}, (_,i) => `2/25 ${String(i).padStart(2,'0')}시`);
+const hours26 = Array.from({length:24}, (_,i) => `2/26 ${String(i).padStart(2,'0')}시`);
+const allHours = [...hours25, ...hours26];
+
+// 색상 팔레트
+const COLORS = [
+  '#1a3a6b','#e8392a','#f5a623','#27ae60','#8e44ad',
+  '#2980b9','#e67e22','#16a085','#c0392b','#7f8c8d'
+];
+
+// ============================================================
+// CHART A1 — 기사 길이별 조회수 시간 추이 (상위 5개)
+// ============================================================
+const aLengths = {
+  '1,057자': [0,0,0,0,0,0,0,0,0,0,0,0,0,15,977,921,683,573,451,533,573,618,599,564, 421,273,240,268,320,458,872,997,727,659,519,486,188,165,180,191,220,207,148,120,131,112,98,75],
+  '1,342자': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,5,1511,875,438,322,208,268,257, 227,147,231,308,393,698,970,1195,774,734,727,622,335,377,303,295,287,325,210,216,225,168,187,130],
+  '1,374자': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,998,1056,1044,398,291,256,349,325,348,322, 251,174,154,160,202,245,546,631,529,401,186,129,102,104,81,91,62,33,16,21,21,13,5,7],
+  '1,642자': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,744,873,576,526,508,513,466,412, 338,224,196,218,244,323,630,644,516,347,297,227,109,83,101,104,121,90,61,16,13,13,17,6],
+  '1,698자': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1,0,2,0,0,0,0,2, 0,0,8,2,0,4,147,880,1574,1733,1570,1253,1104,1467,1086,593,254,323,189,231,170,166,126,102],
+};
+new Chart(document.getElementById('chartA1'), {
+  type:'line',
+  data:{
+    labels: allHours,
+    datasets: Object.entries(aLengths).map(([k,v],i)=>({
+      label:k, data:v, borderColor:COLORS[i], backgroundColor:COLORS[i]+'22',
+      borderWidth:2, pointRadius:0, tension:0.3, fill:false
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', labels:{font:{size:11}, boxWidth:12}}},
+    scales:{
+      x:{ticks:{maxTicksLimit:12, font:{size:10}}, grid:{display:false}},
+      y:{ticks:{font:{size:10}}, grid:{color:'#eee'}, title:{display:true, text:'조회수', font:{size:11}}}
+    },
+    interaction:{mode:'index', intersect:false}
+  }
+});
+
+// ============================================================
+// CHART A2 — 기사 길이별 완독률 막대
+// ============================================================
+const aData = [
+  {len:'609자', view:4577, scroll:753},
+  {len:'638자', view:4209, scroll:834},
+  {len:'678자', view:9941, scroll:2209},
+  {len:'843자', view:6866, scroll:884},
+  {len:'865자', view:7492, scroll:942},
+  {len:'1,057자', view:14582, scroll:3119},
+  {len:'1,133자', view:5028, scroll:955},
+  {len:'1,330자', view:7327, scroll:1799},
+  {len:'1,342자', view:13971, scroll:3168},
+  {len:'1,374자', view:9551, scroll:3136},
+  {len:'1,548자', view:8816, scroll:1885},
+  {len:'1,642자', view:9559, scroll:2509},
+  {len:'1,698자', view:12989, scroll:1751},
+  {len:'1,880자', view:3439, scroll:957},
+];
+const aRates = aData.map(d=>+(d.scroll/d.view*100).toFixed(1));
+const aColors = aRates.map(r => r>=25?'#27ae60': r>=18?'#2980b9': r>=14?'#f5a623':'#e8392a');
+new Chart(document.getElementById('chartA2'), {
+  type:'bar',
+  data:{
+    labels: aData.map(d=>d.len),
+    datasets:[{
+      label:'완독률(%)', data:aRates,
+      backgroundColor:aColors, borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`완독률: ${ctx.raw}%`}}
+    },
+    scales:{
+      x:{ticks:{font:{size:10}}, grid:{display:false}},
+      y:{max:40, ticks:{font:{size:10}, callback:v=>v+'%'}, grid:{color:'#eee'},
+         title:{display:true, text:'완독률(%)', font:{size:11}}}
+    }
+  }
+});
+
+// TABLE A
+const tableAData = [...aData].sort((a,b)=>b.scroll/b.view - a.scroll/a.view);
+const tableAEl = document.getElementById('tableA');
+tableAData.forEach((d,i)=>{
+  const rate = (d.scroll/d.view*100).toFixed(1);
+  const color = rate>=25?'#27ae60': rate>=18?'#2980b9': rate>=14?'#f5a623':'#e8392a';
+  const tag = rate>=25?'<span class="tag tag-green">🏆 우수</span>': rate>=18?'<span class="tag tag-blue">✅ 양호</span>': rate>=14?'<span class="tag tag-orange">보통</span>':'<span class="tag tag-red">⚠️ 낮음</span>';
+  tableAEl.innerHTML += `<tr>
+    <td><span class="rank-badge ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</span></td>
+    <td><strong>${d.len}</strong></td>
+    <td>${d.view.toLocaleString()}</td>
+    <td>${d.scroll.toLocaleString()}</td>
+    <td><strong style="color:${color}">${rate}%</strong></td>
+    <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(rate/35*100,100)}%;background:${color}"></div></div><span class="bar-val">${rate}%</span></div></td>
+    <td>${tag}</td>
+  </tr>`;
+});
+
+// ============================================================
+// CHART B1 — TOP 5 서브섹션 시간 추이
+// ============================================================
+const bSubs = {
+  '사회일반': [0,0,0,0,0,0,0,0,0,0,0,1,1,69,4857,4672,4749,4453,3054,2784,3161,3194,2645,2375, 1825,1233,1181,1293,1609,2102,4091,4645,3997,3545,3517,4721,3170,3809,3873,6142,6571,5161,3352,3461,2806,2652,2343,1707],
+  '사건/사고': [0,0,0,0,0,0,0,0,0,1,0,1,0,29,1952,1852,1577,1278,888,869,935,946,890,710, 502,344,369,426,518,708,1386,1533,1708,1775,1476,921,751,637,536,700,528,458,231,211,291,220,226,171],
+  '대통령실': [0,0,0,0,0,0,0,0,0,0,0,0,0,6,359,309,247,1934,1173,684,649,618,504,444, 404,261,337,445,545,883,1390,1625,1080,963,910,810,467,513,416,393,419,419,270,334,313,238,249,174],
+  '정치일반': [0,0,0,0,0,0,0,1,0,0,0,0,0,24,1057,885,777,444,279,163,324,314,229,175, 106,89,90,83,107,134,450,547,397,489,461,328,1214,1698,1114,957,637,599,677,1387,1213,878,675,558],
+  '산업/기업': [0,0,0,0,0,0,0,0,0,1,0,0,0,0,93,88,105,68,46,70,33,53,25,43, 38,30,33,34,27,34,249,1141,2044,2071,1933,1503,1301,1684,1440,862,443,509,328,349,291,258,202,174],
+};
+new Chart(document.getElementById('chartB1'), {
+  type:'line',
+  data:{
+    labels:allHours,
+    datasets:Object.entries(bSubs).map(([k,v],i)=>({
+      label:k, data:v, borderColor:COLORS[i], backgroundColor:COLORS[i]+'22',
+      borderWidth:2, pointRadius:0, tension:0.3, fill:false
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', labels:{font:{size:11}, boxWidth:12}}},
+    scales:{
+      x:{ticks:{maxTicksLimit:12, font:{size:10}}, grid:{display:false}},
+      y:{ticks:{font:{size:10}}, grid:{color:'#eee'}}
+    },
+    interaction:{mode:'index', intersect:false}
+  }
+});
+
+// CHART B2 — 서브섹션 총 조회수 가로 막대
+const bTotals = [
+  {name:'사회일반', val:114819}, {name:'사건/사고', val:28554},
+  {name:'대통령실', val:20785}, {name:'정치일반', val:19560},
+  {name:'산업/기업', val:17603}, {name:'경제일반', val:11581},
+  {name:'뉴스일반', val:11417}, {name:'북한/한반도', val:9721},
+  {name:'법원/검찰', val:8432}, {name:'국제일반', val:7259},
+];
+new Chart(document.getElementById('chartB2'), {
+  type:'bar',
+  data:{
+    labels:bTotals.map(d=>d.name),
+    datasets:[{
+      label:'조회수', data:bTotals.map(d=>d.val),
+      backgroundColor:COLORS, borderRadius:5, borderSkipped:false
+    }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{font:{size:10}, callback:v=>v>=1000?Math.round(v/1000)+'K':v}, grid:{color:'#eee'}},
+      y:{ticks:{font:{size:11}}, grid:{display:false}}
+    }
+  }
+});
+
+// TABLE B
+const totalBSum = bTotals.reduce((s,d)=>s+d.val,0);
+const tableBEl = document.getElementById('tableB');
+const bSectionMap = {
+  '사회일반':'사회','사건/사고':'사회','대통령실':'정치','정치일반':'정치',
+  '산업/기업':'경제','경제일반':'경제','뉴스일반':'더미션','북한/한반도':'국제',
+  '법원/검찰':'사회','국제일반':'국제'
+};
+bTotals.forEach((d,i)=>{
+  const pct = (d.val/totalBSum*100).toFixed(1);
+  tableBEl.innerHTML += `<tr>
+    <td><span class="rank-badge ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</span></td>
+    <td><strong>${d.name}</strong></td>
+    <td>${bSectionMap[d.name]||'—'}</td>
+    <td>${d.val.toLocaleString()}</td>
+    <td>${pct}%</td>
+    <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(d.val/114819*100,100)}%;background:${COLORS[i]}"></div></div><span class="bar-val">${pct}%</span></div></td>
+  </tr>`;
+});
+
+// ============================================================
+// CHART C1 — TOP 5 헤드라인 시간 추이
+// ============================================================
+const cHeadlines = {
+  '신생아 담배 산후도우미': [0,0,0,0,0,0,0,0,0,0,0,0,0,15,977,921,682,572,451,531,573,618,599,564, 421,273,239,268,320,457,871,997,727,658,518,486,188,165,176,190,217,205,147,120,129,112,98,75],
+  '"이부진 감사" 호명': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,5,1510,875,438,322,207,267,257, 227,147,231,307,393,698,969,1195,774,734,727,621,335,377,303,295,287,324,210,215,225,166,187,130],
+  'AI 홈쇼핑 모델': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,2, 0,0,8,2,0,4,147,880,1574,1733,1570,1252,1104,1467,1085,593,253,321,187,231,170,166,126,102],
+  '강북 모텔 연쇄 사망': [0,0,0,0,0,0,0,0,0,0,0,0,0,18,1029,1021,926,875,569,523,510,513,467,412, 337,224,196,218,243,323,629,644,516,347,295,228,109,83,101,102,121,90,61,16,13,13,16,6],
+  '이부진 서울대 입학식': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,782,2091,1862,1457,802,644,660,671,581,357],
+};
+new Chart(document.getElementById('chartC1'), {
+  type:'line',
+  data:{
+    labels:allHours,
+    datasets:Object.entries(cHeadlines).map(([k,v],i)=>({
+      label:k, data:v, borderColor:COLORS[i], backgroundColor:COLORS[i]+'22',
+      borderWidth:2, pointRadius:0, tension:0.3, fill:false
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', labels:{font:{size:10}, boxWidth:12}}},
+    scales:{
+      x:{ticks:{maxTicksLimit:12, font:{size:10}}, grid:{display:false}},
+      y:{ticks:{font:{size:10}}, grid:{color:'#eee'}}
+    },
+    interaction:{mode:'index', intersect:false}
+  }
+});
+
+// CHART C2 — TOP 10 헤드라인 총 조회수
+const cTotals = [
+  {name:'신생아 담배 산후도우미', val:14560, type:'😱 분노·충격'},
+  {name:'"이부진 감사" 호명', val:13960, type:'👑 유명인'},
+  {name:'AI 홈쇼핑 모델', val:12980, type:'🤖 AI 호기심'},
+  {name:'강북 모텔 연쇄 사망', val:11794, type:'🚨 사건사고'},
+  {name:'이부진 서울대 입학식', val:9910, type:'👑 유명인'},
+  {name:'월남전 참전용사 5천만원', val:7454, type:'💛 감동·인간미'},
+  {name:'민희진 255억 소송', val:7075, type:'🎤 연예 갈등'},
+  {name:'충주맨 집단 따돌림', val:6847, type:'😄 화제 인물'},
+  {name:'룰라 靑 의전 디테일', val:5889, type:'🌏 국격·자부심'},
+  {name:'은마 예비 여고생 화재', val:7266, type:'😱 분노·충격'},
+];
+const cTypeColors = {
+  '😱 분노·충격':'#e8392a','👑 유명인':'#f5a623','🤖 AI 호기심':'#2980b9',
+  '🚨 사건사고':'#c0392b','💛 감동·인간미':'#27ae60','🎤 연예 갈등':'#8e44ad',
+  '😄 화제 인물':'#16a085','🌏 국격·자부심':'#1a3a6b'
+};
+new Chart(document.getElementById('chartC2'), {
+  type:'bar',
+  data:{
+    labels:cTotals.map(d=>d.name),
+    datasets:[{
+      label:'조회수', data:cTotals.map(d=>d.val),
+      backgroundColor:cTotals.map(d=>cTypeColors[d.type]||'#1a3a6b'),
+      borderRadius:5, borderSkipped:false
+    }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{font:{size:10}, callback:v=>v>=1000?Math.round(v/1000)+'K':v}, grid:{color:'#eee'}},
+      y:{ticks:{font:{size:10}}, grid:{display:false}}
+    }
+  }
+});
+
+// TABLE C
+const tableCEl = document.getElementById('tableC');
+const cKeyMap = {
+  '😱 분노·충격':'tag-red','👑 유명인':'tag-orange','🤖 AI 호기심':'tag-blue',
+  '🚨 사건사고':'tag-red','💛 감동·인간미':'tag-green','🎤 연예 갈등':'tag-purple',
+  '😄 화제 인물':'tag-green','🌏 국격·자부심':'tag-blue'
+};
+const cTechMap = {
+  '😱 분노·충격':'말줄임표·피해자 서사','👑 유명인':'실명+구체 상황','🤖 AI 호기심':'반전 구조+따옴표',
+  '🚨 사건사고':'속보성+연속 보도','💛 감동·인간미':'숫자+감성 서사','🎤 연예 갈등':'금액+갈등 구도',
+  '😄 화제 인물':'공공기관+반전','🌏 국격·자부심':'외국인 반응+자부심'
+};
+[...cTotals].sort((a,b)=>b.val-a.val).forEach((d,i)=>{
+  tableCEl.innerHTML += `<tr>
+    <td><span class="rank-badge ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</span></td>
+    <td style="max-width:280px;font-size:12px;">${d.name}</td>
+    <td><strong>${d.val.toLocaleString()}</strong></td>
+    <td><span class="tag ${cKeyMap[d.type]||'tag-blue'}">${d.type}</span></td>
+    <td style="font-size:11px;color:#6b7a99;">${cTechMap[d.type]||'—'}</td>
+  </tr>`;
+});
+
+// ============================================================
+// CHART D1 — 시간별 총 세션 수
+// ============================================================
+const dSessions25 = [0,2,0,0,0,0,0,1,1,2,1256,8309,6672,9134,9559,8518,8244,8179,5304,4516,4743,4763,4139,3650];
+const dSessions26 = [2809,1946,1781,1715,2116,2939,5317,7826,9879,10079,9445,8476,7188,8838,7950,9389,9233,7747,5089,5555,5292,4424,3792,3057];
+new Chart(document.getElementById('chartD1'), {
+  type:'line',
+  data:{
+    labels:allHours,
+    datasets:[
+      {label:'2/25 (토)', data:[...dSessions25,...Array(24).fill(null)], borderColor:'#1a3a6b', backgroundColor:'#1a3a6b22', borderWidth:2.5, pointRadius:0, tension:0.3, fill:true},
+      {label:'2/26 (일)', data:[...Array(24).fill(null),...dSessions26], borderColor:'#e8392a', backgroundColor:'#e8392a22', borderWidth:2.5, pointRadius:0, tension:0.3, fill:true},
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', labels:{font:{size:11}, boxWidth:12}}},
+    scales:{
+      x:{ticks:{maxTicksLimit:12, font:{size:10}}, grid:{display:false}},
+      y:{ticks:{font:{size:10}}, grid:{color:'#eee'}, title:{display:true, text:'세션 수', font:{size:11}}}
+    },
+    interaction:{mode:'index', intersect:false}
+  }
+});
+
+// CHART D2 — 시간별 평균 세션 길이
+const dAvg25 = [0,20030,0,0,0,0,0,28.9,0.009,44,82.2,69.7,70.5,73.2,94.4,95.2,87.5,90.3,87.7,84.2,92.0,91.5,77.0,81.0];
+const dAvg26 = [91.5,89.8,91.3,127.7,123.2,122.2,122.1,111.0,103.8,106.3,105.3,94.8,80.2,89.8,96.6,88.4,88.1,88.6,90.4,93.9,89.2,89.1,84.2,83.0];
+// 이상치(20030) 제거 → null 처리
+const dAvg25Clean = dAvg25.map((v,i)=> (i===1||v>500)?null:v);
+new Chart(document.getElementById('chartD2'), {
+  type:'line',
+  data:{
+    labels:allHours,
+    datasets:[
+      {label:'2/25 (토)', data:[...dAvg25Clean,...Array(24).fill(null)], borderColor:'#1a3a6b', backgroundColor:'#1a3a6b22', borderWidth:2.5, pointRadius:0, tension:0.3, fill:false, spanGaps:true},
+      {label:'2/26 (일)', data:[...Array(24).fill(null),...dAvg26], borderColor:'#e8392a', backgroundColor:'#e8392a22', borderWidth:2.5, pointRadius:0, tension:0.3, fill:false},
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', labels:{font:{size:11}, boxWidth:12}}},
+    scales:{
+      x:{ticks:{maxTicksLimit:12, font:{size:10}}, grid:{display:false}},
+      y:{
+        min:60, max:140,
+        ticks:{font:{size:10}, callback:v=>v+'초'},
+        grid:{color:'#eee'},
+        title:{display:true, text:'평균 세션 길이(초)', font:{size:11}}
+      }
+    },
+    interaction:{mode:'index', intersect:false}
+  }
+});
+
+// ============================================================
+// CHART E1 — 섹션별 조회수 시간 추이
+// ============================================================
+const eSections = {
+  '사회': [0,0,0,0,0,0,0,0,0,1,0,2,1,105,7213,7031,6655,6022,4118,3844,4320,4347,3736,3245, 2468,1674,1634,1797,2205,2892,5591,7231,7098,6759,6507,6178,4178,4826,4772,7264,7604,6104,3884,4153,3635,3281,2925,2092],
+  '정치': [0,0,0,0,0,0,0,1,0,0,0,0,0,30,1448,1224,1064,2415,1500,877,1009,948,776,646, 531,362,443,538,665,1043,1859,2676,3181,3034,2159,1931,2382,2961,2033,1832,1505,1485,1236,1995,1809,1333,1095,889],
+  '경제': [0,1,0,0,0,0,0,0,0,1,0,0,0,16,1005,871,833,860,510,515,491,455,360,385, 284,206,237,157,178,236,592,1624,2580,2688,2959,2244,1904,2286,2305,2321,2183,2116,1033,839,822,753,619,548],
+  '더미션': [0,0,0,0,0,0,0,0,0,0,0,0,0,8,740,872,944,827,665,510,644,702,546,481, 458,238,158,269,294,427,638,873,1129,1052,1129,1043,614,884,885,898,909,842,731,855,903,763,573,472],
+  '엔터': [0,0,0,0,0,0,0,0,0,0,0,0,0,9,504,567,674,442,253,214,199,207,217,188, 154,148,102,69,103,109,126,267,475,525,507,510,478,734,615,527,501,468,350,244,256,195,198,175],
+};
+new Chart(document.getElementById('chartE1'), {
+  type:'line',
+  data:{
+    labels:allHours,
+    datasets:Object.entries(eSections).map(([k,v],i)=>({
+      label:k, data:v, borderColor:COLORS[i], backgroundColor:COLORS[i]+'22',
+      borderWidth:2, pointRadius:0, tension:0.3, fill:false
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', labels:{font:{size:11}, boxWidth:12}}},
+    scales:{
+      x:{ticks:{maxTicksLimit:12, font:{size:10}}, grid:{display:false}},
+      y:{ticks:{font:{size:10}}, grid:{color:'#eee'}, title:{display:true, text:'조회수', font:{size:11}}}
+    },
+    interaction:{mode:'index', intersect:false}
+  }
+});
+
+// ============================================================
+// CHART E2 — 섹션별 완독률 막대
+// ============================================================
+const eData = [
+  {sec:'정치',   view:50916, scroll:10852},
+  {sec:'사회',   view:157400, scroll:30235},
+  {sec:'경제',   view:38017, scroll:6574},
+  {sec:'국제',   view:10283, scroll:1655},
+  {sec:'라이프', view:8161,  scroll:1273},
+  {sec:'엔터',   view:11310, scroll:1747},
+  {sec:'더미션', view:23978, scroll:3214},
+  {sec:'오피니언',view:4015, scroll:422},
+];
+const eRates = eData.map(d=>+(d.scroll/d.view*100).toFixed(1));
+const eColors = eRates.map(r=> r>=20?'#27ae60': r>=16?'#2980b9': r>=13?'#f5a623':'#e8392a');
+new Chart(document.getElementById('chartE2'), {
+  type:'bar',
+  data:{
+    labels: eData.map(d=>d.sec),
+    datasets:[{
+      label:'완독률(%)', data:eRates,
+      backgroundColor:eColors, borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`완독률: ${ctx.raw}%`}}
+    },
+    scales:{
+      x:{ticks:{font:{size:11}}, grid:{display:false}},
+      y:{
+        max:28,
+        ticks:{font:{size:10}, callback:v=>v+'%'},
+        grid:{color:'#eee'},
+        title:{display:true, text:'완독률(%)', font:{size:11}}
+      }
+    }
+  }
+});
+
+// TABLE E
+const tableEEl = document.getElementById('tableE');
+const eSorted = [...eData].sort((a,b)=>(b.scroll/b.view)-(a.scroll/a.view));
+const eStrategyMap = {
+  '정치':'심층 분석 기사 확대, 트래픽 극대화',
+  '사회':'현 전략 유지, 균형 잡힌 성과',
+  '경제':'산업/기업 서브섹션 집중 강화',
+  '국제':'북한/한반도 콘텐츠 집중',
+  '라이프':'레저·여행 콘텐츠 강화',
+  '엔터':'방송/연예 심층 기사 보강',
+  '더미션':'묵상·설교 분량 조정 검토',
+  '오피니언':'도입 요약 박스·소제목 추가 시급',
+};
+eSorted.forEach((d,i)=>{
+  const rate = (d.scroll/d.view*100).toFixed(1);
+  const color = rate>=20?'#27ae60': rate>=16?'#2980b9': rate>=13?'#f5a623':'#e8392a';
+  const tag = rate>=20?'<span class="tag tag-green">🏆 우수</span>':
+              rate>=16?'<span class="tag tag-blue">✅ 양호</span>':
+              rate>=13?'<span class="tag tag-orange">보통</span>':
+              '<span class="tag tag-red">⚠️ 개선 필요</span>';
+  tableEEl.innerHTML += `<tr>
+    <td><span class="rank-badge ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</span></td>
+    <td><strong>${d.sec}</strong></td>
+    <td>${d.view.toLocaleString()}</td>
+    <td>${d.scroll.toLocaleString()}</td>
+    <td><strong style="color:${color}">${rate}%</strong></td>
+    <td>
+      <div class="bar-wrap">
+        <div class="bar-bg">
+          <div class="bar-fill" style="width:${Math.min(rate/25*100,100)}%;background:${color}"></div>
+        </div>
+        <span class="bar-val">${rate}%</span>
+      </div>
+    </td>
+    <td style="font-size:11px;color:#6b7a99;">${eStrategyMap[d.sec]||'—'}</td>
+  </tr>`;
+});
+
+// ============================================================
+// 날짜 구분선 플러그인 (모든 차트에 2/25→2/26 경계 표시)
+// ============================================================
+Chart.register({
+  id:'dayDivider',
+  afterDraw(chart){
+    const idx = 24; // 2/26 00시 인덱스
+    if(!chart.scales.x) return;
+    const meta = chart.getDatasetMeta(0);
+    if(!meta || !meta.data || !meta.data[idx]) return;
+    const x = meta.data[idx].x;
+    const {top, bottom} = chart.chartArea;
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([5,4]);
+    ctx.strokeStyle = 'rgba(100,100,100,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(100,100,100,0.7)';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('2/26 →', x+22, top+12);
+    ctx.restore();
+  }
+});
+
+</script>
+</body>
+</html>

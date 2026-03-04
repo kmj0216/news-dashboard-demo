@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국민일보 PV 분석 보고서</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #f4f6f9; color: #222; }
+  .cover {
+    background: linear-gradient(135deg, #1a3a6b 0%, #2563a8 60%, #3b82c4 100%);
+    color: white; padding: 80px 60px; min-height: 260px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .cover h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .cover .subtitle { font-size: 1.1rem; opacity: 0.85; margin-bottom: 8px; }
+  .cover .meta { font-size: 0.9rem; opacity: 0.65; margin-top: 18px; }
+  .cover .badge {
+    display: inline-block; background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35); border-radius: 20px;
+    padding: 4px 14px; font-size: 0.8rem; margin-top: 10px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; }
+  .section {
+    background: white; border-radius: 14px; padding: 36px 36px 28px;
+    margin-bottom: 36px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 2px solid #e8edf5; padding-bottom: 16px; margin-bottom: 28px;
+  }
+  .section-num {
+    background: #1a3a6b; color: white; border-radius: 50%;
+    width: 36px; height: 36px; display: flex; align-items: center;
+    justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.25rem; font-weight: 700; color: #1a3a6b; }
+  .section-desc { font-size: 0.85rem; color: #666; margin-top: 3px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .kpi-card {
+    background: #f0f4fb; border-radius: 10px; padding: 18px 16px;
+    text-align: center; border-left: 4px solid #2563a8;
+  }
+  .kpi-label { font-size: 0.78rem; color: #555; margin-bottom: 6px; }
+  .kpi-value { font-size: 1.7rem; font-weight: 700; color: #1a3a6b; }
+  .kpi-sub { font-size: 0.75rem; color: #888; margin-top: 4px; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .chart-box { background: #fafbfd; border-radius: 10px; padding: 20px; border: 1px solid #e8edf5; }
+  .chart-box.full { grid-column: 1 / -1; }
+  .chart-title { font-size: 0.92rem; font-weight: 600; color: #333; margin-bottom: 14px; }
+  canvas { max-height: 280px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th { background: #1a3a6b; color: white; padding: 10px 14px; text-align: left; font-weight: 600; }
+  td { padding: 9px 14px; border-bottom: 1px solid #eef0f5; }
+  tr:nth-child(even) td { background: #f7f9fc; }
+  tr:hover td { background: #eef3fb; }
+  .rank-badge {
+    display: inline-block; width: 22px; height: 22px; border-radius: 50%;
+    background: #2563a8; color: white; font-size: 0.72rem; font-weight: 700;
+    text-align: center; line-height: 22px;
+  }
+  .rank-badge.gold { background: #f59e0b; }
+  .rank-badge.silver { background: #94a3b8; }
+  .rank-badge.bronze { background: #b45309; }
+  .insight-box {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #2563a8; border-radius: 8px;
+    padding: 14px 18px; margin-top: 20px; font-size: 0.88rem; color: #1e3a5f;
+    line-height: 1.7;
+  }
+  .insight-box strong { color: #1a3a6b; }
+  .warning-box {
+    background: #fff7ed; border-left: 4px solid #f59e0b;
+    border-radius: 8px; padding: 12px 16px; margin-top: 14px;
+    font-size: 0.85rem; color: #78350f; line-height: 1.6;
+  }
+  /* Journey Map */
+  .journey-map {
+    display: flex; align-items: stretch; gap: 0;
+    margin: 20px 0; overflow-x: auto;
+  }
+  .journey-step {
+    flex: 1; min-width: 160px; text-align: center;
+    position: relative;
+  }
+  .journey-step:not(:last-child)::after {
+    content: ''; position: absolute; top: 38px; right: -18px;
+    width: 36px; height: 2px; background: #cbd5e1; z-index: 1;
+  }
+  .journey-step:not(:last-child)::before {
+    content: '▶'; position: absolute; top: 29px; right: -10px;
+    color: #94a3b8; font-size: 0.8rem; z-index: 2;
+  }
+  .step-icon {
+    width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; border: 3px solid;
+  }
+  .step-icon.s1 { background: #dbeafe; border-color: #2563a8; }
+  .step-icon.s2 { background: #dcfce7; border-color: #16a34a; }
+  .step-icon.s3 { background: #fef9c3; border-color: #ca8a04; }
+  .step-icon.s4 { background: #fce7f3; border-color: #db2777; }
+  .step-name { font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
+  .step-count { font-size: 1.3rem; font-weight: 700; color: #1a3a6b; }
+  .step-rate {
+    font-size: 0.78rem; color: white; background: #64748b;
+    border-radius: 12px; padding: 2px 10px; display: inline-block; margin-top: 4px;
+  }
+  .step-rate.drop { background: #ef4444; }
+  .step-time { font-size: 0.75rem; color: #888; margin-top: 4px; }
+  /* AI badge */
+  .ai-badge {
+    display: inline-block; background: #7c3aed; color: white;
+    border-radius: 4px; padding: 1px 7px; font-size: 0.72rem; font-weight: 600;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .source-tag {
+    display: inline-block; border-radius: 4px; padding: 2px 8px;
+    font-size: 0.75rem; font-weight: 600; margin-right: 4px;
+  }
+  .tag-ai { background: #ede9fe; color: #5b21b6; }
+  .tag-sns { background: #fce7f3; color: #9d174d; }
+  .tag-ad { background: #dcfce7; color: #166534; }
+  .footer {
+    text-align: center; color: #aaa; font-size: 0.8rem;
+    padding: 30px 0 10px; border-top: 1px solid #e5e7eb; margin-top: 20px;
+  }
+  @media print {
+    body { background: white; }
+    .section { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+    .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 표지 -->
+<div class="cover">
+  <div style="font-size:1rem;opacity:0.7;margin-bottom:8px;">🗞️ 국민일보 디지털 미디어</div>
+  <h1>독자 행동 분석 보고서</h1>
+  <div class="subtitle">Page View & Engagement Analytics Report</div>
+  <div class="badge">📅 분석 기간: 2026년 2월 25일 ~ 26일 (데이터 수집 시작 기준)</div>
+  <div class="meta">생성일: 2026년 2월 27일 &nbsp;|&nbsp; Powered by Amplitude Analytics</div>
+</div>
+
+<div class="container">
+
+  <!-- KPI 요약 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">📊</div>
+      <div>
+        <div class="section-title">핵심 지표 요약 (2/25~26 합산)</div>
+        <div class="section-desc">데이터 수집 시작 후 완전한 이틀 기준 집계</div>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">총 기사 조회수</div>
+        <div class="kpi-value">305,572</div>
+        <div class="kpi-sub">article_view 합산</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">총 기사 클릭수</div>
+        <div class="kpi-value">57,309</div>
+        <div class="kpi-sub">article_click 합산</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">완독률 (scroll_75)</div>
+        <div class="kpi-value">24.7%</div>
+        <div class="kpi-sub">기사 조회 대비</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Day 1 리텐션</div>
+        <div class="kpi-value">11.1%</div>
+        <div class="kpi-sub">2/25 신규 → 2/26 재방문</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 콘텐츠 인기도 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">콘텐츠 인기도 & 독자 관심 분석</div>
+        <div class="section-desc">섹션별·기자별 기사 조회수 및 클릭 모듈 분석 (2/25~26)</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <div class="chart-title">📈 섹션별 기사 조회수 시계열 (2/25 vs 2/26)</div>
+        <canvas id="sectionTimeline"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">🏆 섹션별 누적 조회수 순위</div>
+        <canvas id="sectionBar"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <div class="chart-title">✍️ 기자별 기사 조회수 시계열 (2/25 vs 2/26)</div>
+        <canvas id="authorTimeline"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">🖱️ 클릭 모듈별 클릭수 (2/26 기준)</div>
+        <canvas id="moduleBar"></canvas>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:4px;">
+      <table>
+        <thead><tr><th>순위</th><th>섹션</th><th>2/25</th><th>2/26</th><th>합계</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rank-badge gold">1</span></td><td>사회</td><td>50,640</td><td>106,750</td><td><strong>157,390</strong></td></tr>
+          <tr><td><span class="rank-badge silver">2</span></td><td>정치</td><td>11,938</td><td>38,977</td><td><strong>50,915</strong></td></tr>
+          <tr><td><span class="rank-badge bronze">3</span></td><td>경제</td><td>6,302</td><td>31,714</td><td><strong>38,016</strong></td></tr>
+          <tr><td><span class="rank-badge">4</span></td><td>더미션</td><td>6,939</td><td>17,037</td><td><strong>23,976</strong></td></tr>
+          <tr><td><span class="rank-badge">5</span></td><td>엔터</td><td>3,474</td><td>7,836</td><td><strong>11,310</strong></td></tr>
+          <tr><td><span class="rank-badge">6</span></td><td>국제</td><td>5,618</td><td>4,664</td><td><strong>10,282</strong></td></tr>
+          <tr><td><span class="rank-badge">7</span></td><td>라이프</td><td>2,084</td><td>6,077</td><td><strong>8,161</strong></td></tr>
+          <tr><td><span class="rank-badge">8</span></td><td>오피니언</td><td>1,084</td><td>2,931</td><td><strong>4,015</strong></td></tr>
+          <tr><td><span class="rank-badge">9</span></td><td>e스포츠</td><td>345</td><td>448</td><td><strong>793</strong></td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>순위</th><th>기자</th><th>2/25</th><th>2/26</th><th>합계</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rank-badge gold">1</span></td><td>박민지</td><td>11,268</td><td>35,020</td><td><strong>46,288</strong></td></tr>
+          <tr><td><span class="rank-badge silver">2</span></td><td>백재연</td><td>15,677</td><td>28,333</td><td><strong>44,010</strong></td></tr>
+          <tr><td><span class="rank-badge bronze">3</span></td><td>김상기</td><td>9,565</td><td>24,585</td><td><strong>34,150</strong></td></tr>
+          <tr><td><span class="rank-badge">4</span></td><td>구정하</td><td>6,810</td><td>17,174</td><td><strong>23,984</strong></td></tr>
+          <tr><td><span class="rank-badge">5</span></td><td>신주은</td><td>45</td><td>13,029</td><td><strong>13,074</strong></td></tr>
+          <tr><td><span class="rank-badge">6</span></td><td>한명오</td><td>3,310</td><td>9,732</td><td><strong>13,042</strong></td></tr>
+          <tr><td><span class="rank-badge">7</span></td><td>이찬희 외</td><td>5,010</td><td>3,998</td><td><strong>9,008</strong></td></tr>
+          <tr><td><span class="rank-badge">8</span></td><td>권남영</td><td>1,301</td><td>3,516</td><td><strong>4,817</strong></td></tr>
+          <tr><td><span class="rank-badge">9</span></td><td>임성수</td><td>2,364</td><td>1,334</td><td><strong>3,698</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight-box">
+      💡 <strong>사회 섹션이 전체 조회의 약 40%</strong>를 차지하며 압도적 1위입니다. 박민지·백재연 기자가 양강 구도를 형성하고 있으며, 클릭 모듈에서 <strong>home_unknown(미태깅)</strong>이 1위인 점은 홈 화면 일부 모듈의 추적 태그 누락을 의미합니다.
+    </div>
+    <div class="warning-box">
+      ⚠️ <strong>home_unknown 태깅 누락 즉시 수정 필요</strong> — 홈 화면 클릭의 상당 부분이 어떤 모듈에서 발생했는지 추적 불가 상태입니다.
+    </div>
+  </div>
+
+  <!-- 2. 완독률 & 품질 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">독자 완독률 & 콘텐츠 품질 분석</div>
+        <div class="section-desc">기사 조회 → 클릭 → 30초 체류 → 75% 스크롤 사용자 여정 분석</div>
+      </div>
+    </div>
+
+    <!-- 사용자 여정 맵 -->
+    <div class="chart-title" style="margin-bottom:16px;">🗺️ 독자 사용자 여정(Journey) 맵 — 2/25~26 합산</div>
+    <div class="journey-map">
+      <div class="journey-step">
+        <div class="step-icon s1">📰</div>
+        <div class="step-name">기사 조회</div>
+        <div class="step-count">305,572</div>
+        <div class="step-rate">100%</div>
+        <div class="step-time">시작점</div>
+      </div>
+      <div class="journey-step">
+        <div class="step-icon s2">🖱️</div>
+        <div class="step-name">기사 클릭</div>
+        <div class="step-count">57,309</div>
+        <div class="step-rate drop">18.8%</div>
+        <div class="step-time">평균 30초 후</div>
+      </div>
+      <div class="journey-step">
+        <div class="step-icon s3">⏱️</div>
+        <div class="step-name">30초 이상 체류</div>
+        <div class="step-count">176,741</div>
+        <div class="step-rate">57.8%</div>
+        <div class="step-time">중앙값 90초</div>
+      </div>
+      <div class="journey-step">
+        <div class="step-icon s4">📖</div>
+        <div class="step-name">75% 완독</div>
+        <div class="step-count">59,701</div>
+        <div class="step-rate drop">24.7%</div>
+        <div class="step-time">중앙값 58초</div>
+      </div>
+    </div>
+
+    <div class="chart-row" style="margin-top:24px;">
+      <div class="chart-box">
+        <div class="chart-title">📈 이벤트별 발생량 시계열 (2/25 vs 2/26)</div>
+        <canvas id="engagementTimeline"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">🔄 4단계 퍼널 전환율 (2/25~26 합산)</div>
+        <canvas id="funnelBar"></canvas>
+      </div>
+    </div>
+
+    <table style="margin-top:8px;">
+      <thead><tr><th>단계</th><th>이벤트</th><th>2/25 발생수</th><th>2/26 발생수</th><th>합계</th><th>전환율</th></tr></thead>
+      <tbody>
+        <tr><td>1단계</td><td>기사 조회 (article_view)</td><td>88,652</td><td>216,920</td><td><strong>305,572</strong></td><td>100%</td></tr>
+        <tr><td>2단계</td><td>기사 클릭 (article_click)</td><td>9</td><td>57,300</td><td><strong>57,309</strong></td><td>18.8%</td></tr>
+        <tr><td>3단계</td><td>30초 체류 (engagement_30s)</td><td>53,216</td><td>123,525</td><td><strong>176,741</strong></td><td>57.8%</td></tr>
+        <tr><td>4단계</td><td>75% 완독 (scroll_75)</td><td>18,026</td><td>41,675</td><td><strong>59,701</strong></td><td>24.7%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight-box">
+      💡 기사를 조회한 독자 중 <strong>57.8%가 30초 이상 체류</strong>하며 관심을 보이지만, 최종 완독(75% 스크롤)까지 이어지는 비율은 <strong>24.7%</strong>에 그칩니다. 기사 중반부 이탈을 줄이기 위한 소제목·이미지 배치 최적화가 효과적일 수 있습니다.
+    </div>
+  </div>
+
+  <!-- 3. 유입 경로 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">독자 유입 경로 & 트래픽 소스 분석</div>
+        <div class="section-desc">(none) 제외 UTM 태깅 유입 기준 | AI 벤더 유입 별도 분류</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <div class="chart-title">📊 유입 소스별 조회수 (none 제외, 2/25~26)</div>
+        <canvas id="sourceBar"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">🤖 AI 벤더 vs 일반 소스 비중</div>
+        <canvas id="sourcePie"></canvas>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px;">
+      <!-- 일반 유입 -->
+      <div>
+        <div class="chart-title" style="margin-bottom:10px;">📌 일반 유입 소스 (none 제외)</div>
+        <table>
+          <thead><tr><th>순위</th><th>소스</th><th>유형</th><th>2/25</th><th>2/26</th><th>합계</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="rank-badge gold">1</span></td>
+              <td>beloud.com</td>
+              <td><span class="source-tag tag-ad">광고</span></td>
+              <td>44</td><td>425</td><td><strong>469</strong></td>
+            </tr>
+            <tr>
+              <td><span class="rank-badge silver">2</span></td>
+              <td>ig_text_feed_timeline</td>
+              <td><span class="source-tag tag-sns">SNS</span></td>
+              <td>0</td><td>72</td><td><strong>72</strong></td>
+            </tr>
+            <tr>
+              <td><span class="rank-badge bronze">3</span></td>
+              <td>dable</td>
+              <td><span class="source-tag tag-ad">광고</span></td>
+              <td>12</td><td>75</td><td><strong>87</strong></td>
+            </tr>
+            <tr>
+              <td><span class="rank-badge">4</span></td>
+              <td>ig_text_post_permalink</td>
+              <td><span class="source-tag tag-sns">SNS</span></td>
+              <td>0</td><td>19</td><td><strong>19</strong></td>
+            </tr>
+            <tr>
+              <td><span class="rank-badge">5</span></td>
+              <td>ig</td>
+              <td><span class="source-tag tag-sns">SNS</span></td>
+              <td>3</td><td>3</td><td><strong>6</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- AI 벤더 유입 -->
+      <div>
+        <div class="chart-title" style="margin-bottom:10px;">🤖 AI 벤더 유입 소스 <span class="ai-badge">NEW</span></div>
+        <table>
+          <thead><tr><th>순위</th><th>AI 소스</th><th>서비스</th><th>2/25</th><th>2/26</th><th>합계</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="rank-badge gold">1</span></td>
+              <td>chatgpt.com</td>
+              <td><span class="source-tag tag-ai">ChatGPT</span></td>
+              <td>38</td><td>75</td><td><strong>113</strong></td>
+            </tr>
+            <tr>
+              <td><span class="rank-badge silver">2</span></td>
+              <td>perplexity</td>
+              <td><span class="source-tag tag-ai">Perplexity</span></td>
+              <td>10</td><td>32</td><td><strong>42</strong></td>
+            </tr>
+            <tr>
+              <td><span class="rank-badge bronze">3</span></td>
+              <td>copilot.com</td>
+              <td><span class="source-tag tag-ai">MS Copilot</span></td>
+              <td>4</td><td>13</td><td><strong>17</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="insight-box" style="margin-top:14px;">
+          🤖 <strong>AI 검색 엔진 유입 합계: 172건</strong><br>
+          ChatGPT → Perplexity → MS Copilot 순으로 유입 중. 데이터 수집 초기임에도 AI 벤더 유입이 이미 발생하고 있어, <strong>AI 검색 최적화(AEO)</strong> 전략 수립이 필요합니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="warning-box" style="margin-top:20px;">
+      ⚠️ <strong>전체 트래픽의 99% 이상이 UTM 미태깅 상태</strong>입니다. SNS·뉴스레터·제휴 배포 시 UTM 파라미터 부착 체계를 즉시 정비해야 정확한 채널별 성과 측정이 가능합니다.
+    </div>
+  </div>
+
+  <!-- 4. 디바이스 분석 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">디바이스 & 플랫폼별 독자 행동 분석</div>
+        <div class="section-desc">기기 유형별 기사 조회수 시계열 분석 (2/25~26)</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <div class="chart-title">📈 디바이스별 조회수 시계열 (2/25 vs 2/26)</div>
+        <canvas id="deviceTimeline"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">🍩 디바이스별 비중 (2/25~26 합산)</div>
+        <canvas id="devicePie"></canvas>
+      </div>
+    </div>
+
+    <table style="margin-top:8px;">
+      <thead><tr><th>순위</th><th>디바이스</th><th>유형</th><th>2/25</th><th>2/26</th><th>합계</th><th>비중</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rank-badge gold">1</span></td><td>Windows</td><td>PC</td><td>40,079</td><td>98,494</td><td><strong>138,573</strong></td><td>45.3%</td></tr>
+        <tr><td><span class="rank-badge silver">2</span></td><td>Android</td><td>모바일</td><td>38,619</td><td>98,013</td><td><strong>136,632</strong></td><td>44.7%</td></tr>
+        <tr><td><span class="rank-badge bronze">3</span></td><td>Apple iPhone</td><td>모바일</td><td>5,697</td><td>11,112</td><td><strong>16,809</strong></td><td>5.5%</td></tr>
+        <tr><td><span class="rank-badge">4</span></td><td>Mac</td><td>PC</td><td>1,608</td><td>3,201</td><td><strong>4,809</strong></td><td>1.6%</td></tr>
+        <tr><td><span class="rank-badge">5</span></td><td>Linux</td><td>PC</td><td>332</td><td>780</td><td><strong>1,112</strong></td><td>0.4%</td></tr>
+        <tr><td><span class="rank-badge">6</span></td><td>Apple iPad</td><td>태블릿</td><td>128</td><td>224</td><td><strong>352</strong></td><td>0.1%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight-box" style="margin-top:16px;">
+      💡 <strong>PC(Windows 45.3%)와 Android 모바일(44.7%)이 거의 동등한 비중</strong>으로 양분하고 있습니다. iPhone 사용자는 5.5%로 상대적으로 적어, 모바일 UX 최적화 시 <strong>Android를 최우선 타깃</strong>으로 설정해야 합니다. PC 독자 비중이 높다는 점은 데스크탑 레이아웃 최적화도 중요함을 시사합니다.
+    </div>
+  </div>
+
+  <!-- 5. 리텐션 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title">독자 재방문 & 리텐션 분석</div>
+        <div class="section-desc">신규 독자의 다음날 재방문율 (N-Day Retention)</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">2/25 신규 독자</div>
+        <div class="kpi-value">81,059명</div>
+        <div class="kpi-sub">첫 방문 기준</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">2/25→2/26 재방문</div>
+        <div class="kpi-value">8,981명</div>
+        <div class="kpi-sub">Day 1 리텐션</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Day 1 리텐션율</div>
+        <div class="kpi-value">11.1%</div>
+        <div class="kpi-sub">2/25 코호트 기준</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">2/26 신규 독자</div>
+        <div class="kpi-value">116,568명</div>
+        <div class="kpi-sub">Day 1 측정 진행 중</div>
+      </div>
+    </div>
+
+    <div class="chart-box full" style="margin-top:8px;">
+      <div class="chart-title">📊 신규 독자 코호트별 리텐션 현황</div>
+      <canvas id="retentionBar" style="max-height:200px;"></canvas>
+    </div>
+
+    <div class="insight-box" style="margin-top:16px;">
+      💡 Day 1 리텐션 <strong>11.1%</strong>는 뉴스 미디어 특성상 낮은 편입니다. 대부분의 독자가 검색·SNS를 통해 특정 기사 하나만 보고 이탈하는 패턴으로, <strong>뉴스레터·푸시 알림·관련 기사 추천</strong> 등을 통한 재방문 유도 전략이 필요합니다. 데이터가 더 쌓이면 Day 3·7·14 리텐션 추이를 함께 분석하는 것을 권장합니다.
+    </div>
+  </div>
+
+  <!-- 액션 아이템 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">🎯</div>
+      <div>
+        <div class="section-title">핵심 액션 아이템</div>
+        <div class="section-desc">분석 결과 기반 우선순위별 개선 과제</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>우선순위</th><th>과제</th><th>근거</th><th>담당</th></tr></thead>
+      <tbody>
+        <tr><td>🚨 즉시</td><td>home_unknown 모듈 태깅 누락 수정</td><td>클릭 1위 모듈이 미식별 상태</td><td>개발팀</td></tr>
+        <tr><td>🚨 즉시</td><td>UTM 파라미터 태깅 체계 정비</td><td>99% 이상 미태깅 유입</td><td>마케팅팀</td></tr>
+        <tr><td>📌 단기</td><td>박민지·백재연 기자 인기 기사 패턴 분석</td><td>조회수 TOP2 기자 콘텐츠 전략화</td><td>편집팀</td></tr>
+        <tr><td>📌 단기</td><td>AI 검색 최적화(AEO) 전략 수립</td><td>ChatGPT·Perplexity 유입 이미 발생</td><td>디지털팀</td></tr>
+        <tr><td>📋 중기</td><td>Android 모바일 UX 최적화</td><td>모바일 독자 50% 이상, Android 압도적</td><td>개발팀</td></tr>
+        <tr><td>📋 중기</td><td>재방문 유도 관련 기사 추천 강화</td><td>Day 1 리텐션 11.1% 개선 필요</td><td>서비스팀</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    국민일보 디지털 미디어 | Amplitude Analytics 기반 자동 생성 보고서 | 2026년 2월 27일
+  </div>
+</div>
+
+<script>
+const COLORS = ['#1a3a6b','#2563a8','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#dbeafe','#f59e0b','#10b981'];
+const dates = ['2/25','2/26'];
+
+// 1. 섹션 시계열
+new Chart(document.getElementById('sectionTimeline'), {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [
+      {label:'사회', data:[50640,106750], borderColor:'#1a3a6b', backgroundColor:'rgba(26,58,107,0.08)', tension:0.3, pointRadius:5},
+      {label:'정치', data:[11938,38977], borderColor:'#2563a8', backgroundColor:'rgba(37,99,168,0.08)', tension:0.3, pointRadius:5},
+      {label:'경제', data:[6302,31714], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', tension:0.3, pointRadius:5},
+      {label:'더미션', data:[6939,17037], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', tension:0.3, pointRadius:5},
+      {label:'엔터', data:[3474,7836], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.08)', tension:0.3, pointRadius:5},
+    ]
+  },
+  options: {responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}, scales:{y:{beginAtZero:true, ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 1. 섹션 누적 바
+new Chart(document.getElementById('sectionBar'), {
+  type: 'bar',
+  data: {
+    labels: ['사회','정치','경제','더미션','엔터','국제','라이프','오피니언','e스포츠'],
+    datasets: [{
+      label: '누적 조회수',
+      data: [157390,50915,38016,23976,11310,10282,8161,4015,793],
+      backgroundColor: COLORS
+    }]
+  },
+  options: {indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 1. 기자 시계열
+new Chart(document.getElementById('authorTimeline'), {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [
+      {label:'박민지', data:[11268,35020], borderColor:'#1a3a6b', tension:0.3, pointRadius:5},
+      {label:'백재연', data:[15677,28333], borderColor:'#2563a8', tension:0.3, pointRadius:5},
+      {label:'김상기', data:[9565,24585], borderColor:'#3b82f6', tension:0.3, pointRadius:5},
+      {label:'구정하', data:[6810,17174], borderColor:'#f59e0b', tension:0.3, pointRadius:5},
+      {label:'한명오', data:[3310,9732], borderColor:'#10b981', tension:0.3, pointRadius:5},
+    ]
+  },
+  options: {responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}, scales:{y:{beginAtZero:true, ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 1. 클릭 모듈 바
+new Chart(document.getElementById('moduleBar'), {
+  type: 'bar',
+  data: {
+    labels: ['home_unknown','ws_rank','home_section_block','article_rank_section','article_today_reco','article_aside_rank'],
+    datasets: [{
+      label: '클릭수 (2/26)',
+      data: [21007,8027,7946,5391,3289,3150],
+      backgroundColor: ['#ef4444','#2563a8','#3b82f6','#60a5fa','#93c5fd','#bfdbfe']
+    }]
+  },
+  options: {indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 2. 인게이지먼트 시계열
+new Chart(document.getElementById('engagementTimeline'), {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [
+      {label:'기사 조회', data:[88652,216920], borderColor:'#1a3a6b', tension:0.3, pointRadius:5},
+      {label:'30초 체류', data:[53216,123525], borderColor:'#f59e0b', tension:0.3, pointRadius:5},
+      {label:'75% 완독', data:[18026,41675], borderColor:'#10b981', tension:0.3, pointRadius:5},
+      {label:'기사 클릭', data:[9,57300], borderColor:'#ef4444', tension:0.3, pointRadius:5},
+    ]
+  },
+  options: {responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}, scales:{y:{beginAtZero:true, ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 2. 퍼널 바
+new Chart(document.getElementById('funnelBar'), {
+  type: 'bar',
+  data: {
+    labels: ['①기사 조회','②기사 클릭','③30초 체류','④75% 완독'],
+    datasets: [{
+      label: '사용자 수',
+      data: [305572,57309,176741,59701],
+      backgroundColor: ['#1a3a6b','#2563a8','#f59e0b','#10b981']
+    }]
+  },
+  options: {responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 3. 소스 바
+new Chart(document.getElementById('sourceBar'), {
+  type: 'bar',
+  data: {
+    labels: ['beloud.com','chatgpt.com','dable','ig_feed','perplexity','ig_permalink','copilot.com','ig','zalo'],
+    datasets: [{
+      label: '조회수',
+      data: [469,113,87,72,42,19,17,6,1],
+      backgroundColor: ['#2563a8','#7c3aed','#3b82f6','#ec4899','#7c3aed','#ec4899','#7c3aed','#ec4899','#94a3b8']
+    }]
+  },
+  options: {indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 3. 소스 파이
+new Chart(document.getElementById('sourcePie'), {
+  type: 'doughnut',
+  data: {
+    labels: ['AI 벤더 (ChatGPT·Perplexity·Copilot)','광고 (beloud·dable)','SNS (Instagram)','기타'],
+    datasets: [{
+      data: [172,556,97,1],
+      backgroundColor: ['#7c3aed','#2563a8','#ec4899','#94a3b8']
+    }]
+  },
+  options: {responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+});
+
+// 4. 디바이스 시계열
+new Chart(document.getElementById('deviceTimeline'), {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [
+      {label:'Windows', data:[40079,98494], borderColor:'#1a3a6b', tension:0.3, pointRadius:5},
+      {label:'Android', data:[38619,98013], borderColor:'#10b981', tension:0.3, pointRadius:5},
+      {label:'Apple iPhone', data:[5697,11112], borderColor:'#f59e0b', tension:0.3, pointRadius:5},
+      {label:'Mac', data:[1608,3201], borderColor:'#3b82f6', tension:0.3, pointRadius:5},
+      {label:'Linux', data:[332,780], borderColor:'#94a3b8', tension:0.3, pointRadius:5},
+    ]
+  },
+  options: {responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}, scales:{y:{beginAtZero:true, ticks:{callback:v=>v.toLocaleString()}}}}
+});
+
+// 4. 디바이스 파이
+new Chart(document.getElementById('devicePie'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Windows','Android','Apple iPhone','Mac','Linux','iPad'],
+    datasets: [{
+      data: [138573,136632,16809,4809,1112,352],
+      backgroundColor: ['#1a3a6b','#10b981','#f59e0b','#3b82f6','#94a3b8','#60a5fa']
+    }]
+  },
+  options: {responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+});
+
+// 5. 리텐션 바
+new Chart(document.getElementById('retentionBar'), {
+  type: 'bar',
+  data: {
+    labels: ['2/25 신규 독자 (81,059명)','2/26 신규 독자 (116,568명)'],
+    datasets: [
+      {label:'재방문 (Day 1)', data:[8981,3519], backgroundColor:'#2563a8'},
+      {label:'미재방문', data:[72078,113049], backgroundColor:'#e2e8f0'}
+    ]
+  },
+  options: {
+    responsive:true, indexAxis:'y',
+    plugins:{legend:{position:'bottom'}},
+    scales:{x:{stacked:true, ticks:{callback:v=>v.toLocaleString()}}, y:{stacked:true}},
+  }
+});
+</script>
+</body>
+</html>
